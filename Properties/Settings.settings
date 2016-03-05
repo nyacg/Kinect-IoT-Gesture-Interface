@@ -1,0 +1,15 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Microsoft.Samples.Kinect.BodyBasics.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="hot1Vec" Type="System.Windows.Media.Media3D.Vector3D" Scope="User">
+      <Value Profile="(Default)">1.25,-0.51,2.14</Value>
+    </Setting>
+    <Setting Name="hot2Vec" Type="System.Windows.Media.Media3D.Vector3D" Scope="User">
+      <Value Profile="(Default)">-1.05,-0.16,2.34</Value>
+    </Setting>
+    <Setting Name="hot3Vec" Type="System.Windows.Media.Media3D.Vector3D" Scope="User">
+      <Value Profile="(Default)">0,0,0</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

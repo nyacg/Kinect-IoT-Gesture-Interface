@@ -1,0 +1,15 @@
+C:\Users\Robert\Documents\Home Stuff\Engineering Stuff\Kinect\BodyBasics-WPF\bin\AnyCPU\Debug\BodyBasics-WPF.exe.config
+C:\Users\Robert\Documents\Home Stuff\Engineering Stuff\Kinect\BodyBasics-WPF\bin\AnyCPU\Debug\BodyBasics-WPF.exe
+C:\Users\Robert\Documents\Home Stuff\Engineering Stuff\Kinect\BodyBasics-WPF\bin\AnyCPU\Debug\BodyBasics-WPF.pdb
+C:\Users\Robert\Documents\Home Stuff\Engineering Stuff\Kinect\BodyBasics-WPF\bin\AnyCPU\Debug\Microsoft.Kinect.dll
+C:\Users\Robert\Documents\Home Stuff\Engineering Stuff\Kinect\BodyBasics-WPF\bin\AnyCPU\Debug\Microsoft.Kinect.xml
+C:\Users\Robert\Documents\Home Stuff\Engineering Stuff\Kinect\BodyBasics-WPF\obj\Debug\BodyBasics-WPF.csprojResolveAssemblyReference.cache
+C:\Users\Robert\Documents\Home Stuff\Engineering Stuff\Kinect\BodyBasics-WPF\obj\Debug\MainWindow.baml
+C:\Users\Robert\Documents\Home Stuff\Engineering Stuff\Kinect\BodyBasics-WPF\obj\Debug\MainWindow.g.cs
+C:\Users\Robert\Documents\Home Stuff\Engineering Stuff\Kinect\BodyBasics-WPF\obj\Debug\App.g.cs
+C:\Users\Robert\Documents\Home Stuff\Engineering Stuff\Kinect\BodyBasics-WPF\obj\Debug\BodyBasics-WPF_MarkupCompile.cache
+C:\Users\Robert\Documents\Home Stuff\Engineering Stuff\Kinect\BodyBasics-WPF\obj\Debug\BodyBasics-WPF.g.resources
+C:\Users\Robert\Documents\Home Stuff\Engineering Stuff\Kinect\BodyBasics-WPF\obj\Debug\Microsoft.Samples.Kinect.BodyBasics.Properties.Resources.resources
+C:\Users\Robert\Documents\Home Stuff\Engineering Stuff\Kinect\BodyBasics-WPF\obj\Debug\BodyBasics-WPF.csproj.GenerateResource.Cache
+C:\Users\Robert\Documents\Home Stuff\Engineering Stuff\Kinect\BodyBasics-WPF\obj\Debug\BodyBasics-WPF.exe
+C:\Users\Robert\Documents\Home Stuff\Engineering Stuff\Kinect\BodyBasics-WPF\obj\Debug\BodyBasics-WPF.pdb
