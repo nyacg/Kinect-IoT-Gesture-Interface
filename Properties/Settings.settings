@@ -6,7 +6,7 @@
       <Value Profile="(Default)">1.25,-0.51,2.14</Value>
     </Setting>
     <Setting Name="hot2Vec" Type="System.Windows.Media.Media3D.Vector3D" Scope="User">
-      <Value Profile="(Default)">-1.05,-0.16,2.34</Value>
+      <Value Profile="(Default)">10,10,10</Value>
     </Setting>
     <Setting Name="hot3Vec" Type="System.Windows.Media.Media3D.Vector3D" Scope="User">
       <Value Profile="(Default)">0,0,0</Value>

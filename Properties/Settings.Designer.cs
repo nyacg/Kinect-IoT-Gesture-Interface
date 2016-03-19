@@ -37,7 +37,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-1.05,-0.16,2.34")]
+        [global::System.Configuration.DefaultSettingValueAttribute("10,10,10")]
         public global::System.Windows.Media.Media3D.Vector3D hot2Vec {
             get {
                 return ((global::System.Windows.Media.Media3D.Vector3D)(this["hot2Vec"]));

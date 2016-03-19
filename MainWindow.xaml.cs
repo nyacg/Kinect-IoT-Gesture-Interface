@@ -489,7 +489,8 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                 Vector3D intersectionPoint = intersectionOfLines(v1, v2, elbows[0], elbows[1]);
 
                 Console.WriteLine("New intersection point is: " + intersectionPoint.ToString());
-                Properties.Settings.Default.hot1Vec = intersectionPoint;
+                Properties.Settings.Default.hot2Vec = intersectionPoint;
+                Properties.Settings.Default.Save();
                 done();
             }
 
@@ -519,6 +520,8 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             hotspots.Add(new Hotspot(Properties.Settings.Default.hot2Vec, sysAud));
 
             hotspots.Add(new Hotspot(new Vector3D(0, 0, 0), recordMode));
+            //Console.WriteLine("hot3Vec is: " + Properties.Settings.Default.hot3Vec.ToString());
+           
         }
 
 
@@ -868,12 +871,12 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                 }
                 else if (type == "color")
                 {
-                    socket = new TcpClient();
+                   /* socket = new TcpClient();
                     socket.NoDelay = true;
                     socket.Connect("192.168.2.177", 50007);
                     Console.WriteLine("Socket connected");
                     stream = socket.GetStream();
-                    watch.Start();
+                    watch.Start();*/
                 }
             }
 
@@ -891,7 +894,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     brightness = y * 1.2 + 0.3;
 
                     int intBrightness = (int)(brightness * 65535);
-                    if (watch.ElapsedMilliseconds > 100 && (Math.Abs(last - intBrightness))>400)
+                    if (watch.ElapsedMilliseconds > 100 && (Math.Abs(last - intBrightness))>200)
                     {
                         intBrightness = intBrightness < 0 ? 0 : intBrightness;
                         intBrightness = intBrightness > 65535 ? 65535 : intBrightness;
@@ -906,8 +909,9 @@ namespace Microsoft.Samples.Kinect.BodyBasics
 
 
                         byte[] outstream = Encoding.ASCII.GetBytes(brightString);
-
+                        
                         stream.Write(outstream, 0, outstream.Length);
+                        
                         //stream.Flush();
                         last = intBrightness;
                         Console.WriteLine("Brightness: " + brightness.ToString() + " " + Encoding.Default.GetString(outstream) + " " + outstream.Length);
@@ -920,7 +924,6 @@ namespace Microsoft.Samples.Kinect.BodyBasics
 
                     int volumeChange = 0;
                     int volumeTimes = 0;
-                    double angle = Math.Atan(x / y);
 
                     double scale;
 
@@ -933,8 +936,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                         scale = y;
                     }
 
-                    // it's in the y (vertical) direction
-                    // do sth ...
+                    scale = y;
 
                     volumeTimes = (int)Math.Floor(scale * 100.0);
                     volumeChange = volumeTimes - curVol;
@@ -960,9 +962,9 @@ namespace Microsoft.Samples.Kinect.BodyBasics
 
                 if (type == "color")
                 {
-                    stream.Close();
+                    /*stream.Close();
                     socket.Close();
-                    watch.Reset();
+                    watch.Reset();*/
                 }
             }
 
