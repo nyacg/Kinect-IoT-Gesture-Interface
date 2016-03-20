@@ -18,12 +18,14 @@ namespace Microsoft.Samples.Kinect.BodyBasics
     using System.Windows.Media.Media3D;
     using System.Runtime.InteropServices;
     using System.Windows.Interop;
+    using System.Windows.Input;
     using System.Threading.Tasks;
     using Microsoft.Kinect;
 
-   // using Lifx.Lib;
+    // using Lifx.Lib;
     using System.Net;
     using System.Net.Sockets;
+    using System.Threading;
     using System.Text;
 
     /// <summary>
@@ -243,7 +245,8 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             this.InitializeComponent();
 
             setupHotspots();
-
+            ServicePointManager.DefaultConnectionLimit = 20;
+            ServicePointManager.Expect100Continue = false;
 
         }
 
@@ -402,6 +405,18 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                                         checkForNewGrips(body, joints, hotspot, ref grips);
                                     }
                                 }
+
+                                if (Keyboard.IsKeyDown(Key.D1) && recorder.hotspot_num != Key.D1)
+                                {
+                                    Console.Beep();
+                                    recorder.hotspot_num = Key.D1;
+                                }
+                                else if (Keyboard.IsKeyDown(Key.D2) && recorder.hotspot_num != Key.D2)
+                                {
+                                    Console.Beep();
+                                    recorder.hotspot_num = Key.D2;
+                                }
+
                             }
                             else if (mode == "record")
                             {
@@ -461,6 +476,8 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             List<Vector3D> elbows = new List<Vector3D>();
             List<Vector3D> wrists = new List<Vector3D>();
 
+            public Key hotspot_num = Key.D1;
+
             public void record()
             {
                 mode = "record";
@@ -489,7 +506,22 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                 Vector3D intersectionPoint = intersectionOfLines(v1, v2, elbows[0], elbows[1]);
 
                 Console.WriteLine("New intersection point is: " + intersectionPoint.ToString());
-                Properties.Settings.Default.hot2Vec = intersectionPoint;
+
+                switch (hotspot_num)
+                {
+                    case Key.D1:
+                        Properties.Settings.Default.hot1Vec = intersectionPoint;
+                        break;
+
+                    case Key.D2:
+                        Properties.Settings.Default.hot2Vec = intersectionPoint;
+                        break;
+
+                    default:
+                        Properties.Settings.Default.hot1Vec = intersectionPoint;
+                        break;
+                }
+
                 Properties.Settings.Default.Save();
                 done();
             }
@@ -521,7 +553,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
 
             hotspots.Add(new Hotspot(new Vector3D(0, 0, 0), recordMode));
             //Console.WriteLine("hot3Vec is: " + Properties.Settings.Default.hot3Vec.ToString());
-           
+
         }
 
 
@@ -741,6 +773,7 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     if (!checkGripExistance(grip, ref grips))
                     {
                         grips.Add(grip);
+                        grip.hotspot.iface.pickup(joints);
                     }
                 }
             }
@@ -845,14 +878,17 @@ namespace Microsoft.Samples.Kinect.BodyBasics
             public SolidColorBrush brush;
             public int hue;
             public double brightness = 1.0;
+            public double hued = 1.0;
             private Stopwatch watch = new Stopwatch();
             private VolumeControls volumeControls;
             int curVol;
             private TcpClient socket;
             private NetworkStream stream;
-            private int last = 40055;
-
-
+            private int lastB = 40055;
+            private int lastH = 40055;
+            private string url_base = "http://raspberrypi:5000/set/lamp/";
+            bool finished = true;
+            
             public void pickup(IReadOnlyDictionary<JointType, Joint> joints)
             {
                 Console.WriteLine("Picked up iterface type " + type);
@@ -871,12 +907,14 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                 }
                 else if (type == "color")
                 {
-                   /* socket = new TcpClient();
-                    socket.NoDelay = true;
-                    socket.Connect("192.168.2.177", 50007);
-                    Console.WriteLine("Socket connected");
-                    stream = socket.GetStream();
-                    watch.Start();*/
+                    /* socket = new TcpClient();
+                     socket.NoDelay = true;
+                     socket.Connect("192.168.2.177", 50007);
+                     Console.WriteLine("Socket connected");
+                     stream = socket.GetStream();*/
+                     watch.Start();
+                     finished = true;
+                    
                 }
             }
 
@@ -885,37 +923,85 @@ namespace Microsoft.Samples.Kinect.BodyBasics
 
             }
 
+            private async void makeRequest(string url)
+            {
+                string resp = await MakeAsyncRequest(url, "text/html");
+                finished = true;
+                Console.WriteLine("Got response of {0}", resp);
+            }
+
+            private async Task<WebResponse> callAsyncRequest(string url)
+            {
+                Console.WriteLine("Making request to url " + url);
+                
+               
+                //String value = await MakeAsyncRequest(url, "text/html");
+                
+                //Console.WriteLine("Got response of {0}", task.Result);
+
+
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                request.ContentType = "text/html";
+                request.Method = WebRequestMethods.Http.Get;
+                request.Timeout = 20000;
+                request.Proxy = null;
+
+                WebResponse wr = await request.GetResponseAsync();
+
+                Console.WriteLine("Got response from url " + url);
+                return wr;
+            }
+                
             public void onChange(double x, double y)
             {
                 if (type == "color")
                 {
                     int sx = Convert.ToInt32(this.hue + 500 * x);
                     brush = new SolidColorBrush(ColorFromHSV(sx, 1.0, 1.0));
-                    brightness = y * 1.2 + 0.3;
+                    brightness = y * 1.5 + 0.3;
+                    hued = x * 3.0 + 0.4;
 
                     int intBrightness = (int)(brightness * 65535);
-                    if (watch.ElapsedMilliseconds > 100 && (Math.Abs(last - intBrightness))>200)
+                    int intHue = (int)(hued * 65535);
+
+                    if ((watch.ElapsedMilliseconds > 100 && ((Math.Abs(lastB - intBrightness)) > 2000 || (Math.Abs(lastH - intHue)) > 2000)) && finished)
                     {
+
+                        intBrightness = 65535 - intBrightness;
+                        
                         intBrightness = intBrightness < 0 ? 0 : intBrightness;
                         intBrightness = intBrightness > 65535 ? 65535 : intBrightness;
 
-                        UInt16 smallBright = Convert.ToUInt16(intBrightness);
+                        intHue = intHue < 0 ? 0 : intHue;
+                        intHue = intHue > 65535 ? 65535 : intHue;
 
-                        String brightString = Convert.ToString(smallBright);
-                        while (brightString.Length < 5)
-                        {
-                            brightString = "0" + brightString;
-                        }
+                        lastB = intBrightness;
+                        lastH = intHue;
+                        /* UInt16 smallBright = Convert.ToUInt16(intBrightness);
+
+                         String brightString = Convert.ToString(smallBright);
+                         while (brightString.Length < 5)
+                         {
+                             brightString = "0" + brightString;
+                         }
 
 
-                        byte[] outstream = Encoding.ASCII.GetBytes(brightString);
+                         byte[] outstream = Encoding.ASCII.GetBytes(brightString);
                         
-                        stream.Write(outstream, 0, outstream.Length);
+                         stream.Write(outstream, 0, outstream.Length);
                         
-                        //stream.Flush();
-                        last = intBrightness;
-                        Console.WriteLine("Brightness: " + brightness.ToString() + " " + Encoding.Default.GetString(outstream) + " " + outstream.Length);
-                        watch.Restart();
+                         stream.Flush();
+                        
+                         Console.WriteLine("Brightness: " + brightness.ToString() + " " + Encoding.Default.GetString(outstream) + " " + outstream.Length);*/
+
+                         Console.WriteLine("Brightness: " + intBrightness.ToString() + " Hue: " + intHue.ToString()); //+ " " + hued.ToString());
+                         makeRequest(url_base + intBrightness.ToString() + "/" + intHue.ToString());
+                         finished = false;
+                         //Console.WriteLine("Got response of {0}", task.Result);
+
+                         //callAsyncRequest(url_base + intBrightness.ToString() + "/" + intHue.ToString());
+
+                         watch.Restart();
                     }
 
                 }
@@ -1186,51 +1272,80 @@ namespace Microsoft.Samples.Kinect.BodyBasics
                     (IntPtr)APPCOMMAND_VOLUME_UP);
             }
         }
-    }
-}
 
-       /* private const string Port = "56700";
-        private static readonly ILifxNetwork _network = LifxNetworkFactory.Instance;
-        private static Socket _socket;
+
+
+        /* private const string Port = "56700";
+         private static readonly ILifxNetwork _network = LifxNetworkFactory.Instance;
+         private static Socket _socket;
         
 
 
-        static void LifxNetworkService()
-        {
-            _socket = new Socket(SocketType.Dgram, ProtocolType.Udp);
-            _socket.DontFragment = true;
+         static void LifxNetworkService()
+         {
+             _socket = new Socket(SocketType.Dgram, ProtocolType.Udp);
+             _socket.DontFragment = true;
             
-            _socket. += HandleIncomingMessages;
+             _socket. += HandleIncomingMessages;
 
-            var connectionProfile = NetworkInformation.GetConnectionProfiles().FirstOrDefault(
-                p => p.IsWlanConnectionProfile && p.GetNetworkConnectivityLevel() != NetworkConnectivityLevel.None);
+             var connectionProfile = NetworkInformation.GetConnectionProfiles().FirstOrDefault(
+                 p => p.IsWlanConnectionProfile && p.GetNetworkConnectivityLevel() != NetworkConnectivityLevel.None);
 
-            if (connectionProfile != null)
-            {
-                _socket.BindServiceNameAsync(Port, connectionProfile.NetworkAdapter);
-            }
+             if (connectionProfile != null)
+             {
+                 _socket.BindServiceNameAsync(Port, connectionProfile.NetworkAdapter);
+             }
 
-            _network.RegisterSender(SendCommand);
-        }
+             _network.RegisterSender(SendCommand);
+         }
 
-        private static async void SendCommand(IGateway gateway, byte[] data)
-        {
-            using (var stream = await _socket.GetOutputStreamAsync(new HostName(IpProvider.BroadcastAddress), Port))
-            {
-                await stream.WriteAsync(data.AsBuffer(0, data.Length));
-            }
-        }
+         private static async void SendCommand(IGateway gateway, byte[] data)
+         {
+             using (var stream = await _socket.GetOutputStreamAsync(new HostName(IpProvider.BroadcastAddress), Port))
+             {
+                 await stream.WriteAsync(data.AsBuffer(0, data.Length));
+             }
+         }
         
-        private static void HandleIncomingMessages(Socket sender, DatagramSocketMessageReceivedEventArgs e)
+         private static void HandleIncomingMessages(Socket sender, DatagramSocketMessageReceivedEventArgs e)
+         {
+             var address = e.RemoteAddress.ToString();
+
+             using (var reader = e.GetDataReader())
+             {
+                 var data = reader.DetachBuffer().ToArray();
+                 _network.ReceivedPacket(address, data);
+             }
+
+ }
+     }
+ }*/
+
+        public static Task<string> MakeAsyncRequest(string url, string contentType)
         {
-            var address = e.RemoteAddress.ToString();
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.ContentType = contentType;
+            request.Method = WebRequestMethods.Http.Get;
+            request.Timeout = 200;
+            request.Proxy = null;
 
-            using (var reader = e.GetDataReader())
+            Task<WebResponse> task = Task.Factory.FromAsync(
+                request.BeginGetResponse,
+                asyncResult => request.EndGetResponse(asyncResult),
+                (object)null);
+
+            return task.ContinueWith(t => ReadStreamFromResponse(t.Result));
+        }
+
+        private static string ReadStreamFromResponse(WebResponse response)
+        {
+            using (Stream responseStream = response.GetResponseStream())
+            using (StreamReader sr = new StreamReader(responseStream))
             {
-                var data = reader.DetachBuffer().ToArray();
-                _network.ReceivedPacket(address, data);
+                //Need to return this response 
+                string strContent = sr.ReadToEnd();
+                return strContent;
             }
-
-}
+        }
     }
-}*/
+}
